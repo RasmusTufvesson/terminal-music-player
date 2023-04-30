@@ -63,7 +63,7 @@ impl App {
                                 }
                             },
                             KeyCode::Right => {
-                                self.player.next_song();
+                                self.player.skip_song();
                             },
                             _ => {}
                         }
@@ -84,7 +84,7 @@ impl App {
         }
     }
 
-    fn tick(&self) {
+    fn tick(&mut self) {
         self.player.update();
     }
 

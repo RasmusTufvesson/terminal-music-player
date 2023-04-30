@@ -64,8 +64,24 @@ impl Player {
         return source;
     }
 
-    pub fn next_song(&self) {
+    fn next_song(&mut self) {
+        self.state.index += 1;
+        if self.state.index == self.song_selection.len() {
+            self.state.index = 0;
+            self.song_selection.shuffle(&mut self.rng);
+        }
+        let next_song = &self.song_selection[self.state.index];
+        self.add_to_queue(next_song.clone());
+        self.state.play_time = Duration::ZERO;
+        self.start_instant = Instant::now();
+        self.state.song = next_song.clone();
+    }
 
+    pub fn skip_song(&mut self) {
+        self.sink.clear();
+        self.next_song();
+        self.sink.play();
+        self.state.paused = false;
     }
 
     pub fn pause(&mut self) {
@@ -79,8 +95,10 @@ impl Player {
         }
     }
 
-    pub fn update(&self) {
-        
+    pub fn update(&mut self) {
+        if self.sink.len() == 0 {
+            self.next_song();
+        }
     }
 
     pub fn get_song_progress(&self) -> f64 {
