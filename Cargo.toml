@@ -6,5 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+crossterm = "0.26.1"
+lofty = "0.12.1"
 rand = "0.8.5"
 rodio = "0.17.1"
+serde = { version = "1.0.160", features = ["derive"] }
+toml = "0.7.3"
+tui = "0.19.0"

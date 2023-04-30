@@ -5,3 +5,10 @@ Terminal music player is a music player made for the terminal.
 
 ## In what is it made?
 Terminal music player is made in pure rust using the rodio and tui crates.
+
+## Controls
+| Key | Description |
+| ----------- | ----------- |
+| Right arrow | Next song |
+| Space | Pause |
+| Q | Quit |
