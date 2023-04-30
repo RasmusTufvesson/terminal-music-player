@@ -108,7 +108,7 @@ impl App {
         let block = Block::default().borders(Borders::ALL).title("Song");
         frame.render_widget(block, area);
 
-        let progress = self.player.get_song_progress();
+        let progress = self.player.get_song_progress().min(1.0);
         let label = format!("{}: {:.2}%", self.player.state.song.name, progress * 100.0);
         let bar = Gauge::default()
             .block(Block::default())
