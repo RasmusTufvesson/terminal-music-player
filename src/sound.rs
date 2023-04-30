@@ -22,6 +22,7 @@ impl Song {
         let tagged_file = read_from_path(&path)?;
         let properties = tagged_file.properties();
         let name = Path::new(&path).file_stem().unwrap().to_str().unwrap().to_string().replace("_", " ");
+        let name = format!("{}{}", (&name[..1].to_string()).to_uppercase(), &name[1..]);
         return Ok(Self { duration: properties.duration(), name: name, path: path });
     }
 }
