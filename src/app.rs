@@ -97,30 +97,21 @@ impl App {
     }
 
     fn draw_progress_bar(&self, frame: &mut tui::Frame<CrosstermBackend<Stdout>>, area: Rect) {
-        let chunks = Layout::default()
-            .constraints(
-                [
-                    Constraint::Length(1),
-                ]
-                .as_ref(),
-            )
-            .split(area);
-        let block = Block::default().borders(Borders::ALL).title("Song");
-        frame.render_widget(block, area);
 
         let progress = self.player.get_song_progress().min(1.0);
         let label = format!("{}: {:.2}%", self.player.state.song.name, progress * 100.0);
         let bar = Gauge::default()
-            .block(Block::default())
+            .block(Block::default().title("Song").borders(Borders::ALL))
             .gauge_style(
                 Style::default()
-                    .fg(Color::Magenta)
+                    .fg(Color::LightBlue)
                     .bg(Color::Black)
                     .add_modifier(Modifier::ITALIC | Modifier::BOLD),
             )
             .label(label)
-            .ratio(progress);
-        frame.render_widget(bar, chunks[0]);
+            .ratio(progress)
+            .use_unicode(true);
+        frame.render_widget(bar, area);
     }
 
     fn draw_song_list(&self, frame: &mut tui::Frame<CrosstermBackend<Stdout>>, area: Rect) {
@@ -130,7 +121,7 @@ impl App {
             .collect();
         let tasks = List::new(tasks)
             .block(Block::default().borders(Borders::ALL).title("List"))
-            .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+            .highlight_style(Style::default().add_modifier(Modifier::BOLD).fg(Color::Yellow))
             .highlight_symbol("> ");
         let mut state = ListState::default();
         state.select(Some(self.player.state.index));
