@@ -1,5 +1,5 @@
 use std::{io::{self, Stdout}, time::{Duration, Instant}};
-use tui::{backend::CrosstermBackend, Terminal, layout::{Layout, Constraint, Rect}, widgets::{Borders, Block, Gauge, ListItem, List, ListState}, style::{Style, Color, Modifier}, text::{Spans, Span}};
+use tui::{backend::CrosstermBackend, Terminal, layout::{Layout, Constraint, Rect}, widgets::{Borders, Block, Gauge, ListItem, List, ListState, BarChart}, style::{Style, Color, Modifier}, text::{Spans, Span}};
 use crate::sound::{Player};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
@@ -56,15 +56,18 @@ impl App {
                         was_down = true;
                         match key.code {
                             KeyCode::Char(c) => {
-                                if c == ' ' {
-                                    self.player.pause();
-                                } else if c == 'q' {
-                                    should_quit = true;
+                                match c {
+                                    ' ' => { self.player.pause(); }
+                                    'q' => { should_quit = true; }
+                                    'd' => { self.player.skip_song(); }
+                                    'w' => { self.player.volume_up(); }
+                                    's' => { self.player.volume_down(); }
+                                    _ => {}
                                 }
                             },
-                            KeyCode::Right => {
-                                self.player.skip_song();
-                            },
+                            KeyCode::Right => { self.player.skip_song(); }
+                            KeyCode::Up => { self.player.volume_up(); }
+                            KeyCode::Down => { self.player.volume_down(); }
                             _ => {}
                         }
                     }
@@ -115,6 +118,10 @@ impl App {
     }
 
     fn draw_song_list(&self, frame: &mut tui::Frame<CrosstermBackend<Stdout>>, area: Rect) {
+        let chunks = Layout::default()
+            .direction(tui::layout::Direction::Horizontal)
+            .constraints([Constraint::Min(0), Constraint::Length(3)].as_ref())
+            .split(area);
         let tasks: Vec<ListItem> = self.player.song_selection
             .iter()
             .map(|i| ListItem::new(vec![Spans::from(Span::raw(&i.name))]))
@@ -125,6 +132,23 @@ impl App {
             .highlight_symbol("> ");
         let mut state = ListState::default();
         state.select(Some(self.player.state.index));
-        frame.render_stateful_widget(tasks, area, &mut state);
+        frame.render_stateful_widget(tasks, chunks[0], &mut state);
+        self.draw_volume_indicator(frame, chunks[1])
+    }
+
+    fn draw_volume_indicator(&self, frame: &mut tui::Frame<CrosstermBackend<Stdout>>, area: Rect) {
+        let binding: [(&str, u64); 2] = [("", (self.player.volume*100.0) as u64), ("", 120)];
+        let barchart = BarChart::default()
+            .block(Block::default().title("Vol").borders(Borders::ALL))
+            .data(&binding)
+            .bar_width(1)
+            .bar_gap(0)
+            .bar_style(Style::default().fg(Color::Green))
+            .value_style(
+                Style::default()
+                    .bg(Color::Green)
+                    .add_modifier(Modifier::BOLD),
+            );
+        frame.render_widget(barchart, area);
     }
 }

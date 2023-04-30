@@ -32,6 +32,7 @@ pub struct Player {
     pub song_selection: Vec<Song>,
     rng: rand::rngs::ThreadRng,
     start_instant: Instant,
+    pub volume: f64,
 }
 
 impl Player {
@@ -46,7 +47,8 @@ impl Player {
             state: state,
             song_selection: songs,
             rng: rng,
-            start_instant: Instant::now()
+            start_instant: Instant::now(),
+            volume: 1.0
         };
         player.pause();
         player.add_to_queue(first_song_copy);
@@ -107,6 +109,18 @@ impl Player {
         } else {
             return self.state.play_time.as_millis() as f64 / self.state.song.duration.as_millis() as f64;
         }
+    }
+
+    pub fn volume_up(&mut self) {
+        let new_vol = (self.volume + 0.1).min(1.2);
+        self.volume = new_vol;
+        self.sink.set_volume(new_vol as f32);
+    }
+
+    pub fn volume_down(&mut self) {
+        let new_vol = (self.volume - 0.1).max(0.0);
+        self.volume = new_vol;
+        self.sink.set_volume(new_vol as f32);
     }
 }
 
