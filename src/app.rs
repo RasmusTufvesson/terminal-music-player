@@ -43,6 +43,7 @@ impl App {
     fn mainloop (&mut self, tick_rate: Duration, terminal: &mut Terminal<CrosstermBackend<Stdout>>) -> io::Result<()> {
         let mut last_tick = Instant::now();
         let mut should_quit = false;
+        let mut was_down = false;
         loop {
             terminal.draw(|f: &mut tui::Frame<CrosstermBackend<Stdout>>| self.draw(f))?;
 
@@ -51,20 +52,27 @@ impl App {
                 .unwrap_or_else(|| Duration::from_secs(0));
             if crossterm::event::poll(timeout)? {
                 if let Event::Key(key) = event::read()? {
-                    match key.code {
-                        KeyCode::Char(c) => {
-                            if c == ' ' {
-                                self.player.pause();
-                            } else if c == 'q' {
-                                should_quit = true;
-                            }
-                        },
-                        KeyCode::Right => {
-                            self.player.next_song();
-                        },
-                        _ => {}
+                    if !was_down {
+                        was_down = true;
+                        match key.code {
+                            KeyCode::Char(c) => {
+                                if c == ' ' {
+                                    self.player.pause();
+                                } else if c == 'q' {
+                                    should_quit = true;
+                                }
+                            },
+                            KeyCode::Right => {
+                                self.player.next_song();
+                            },
+                            _ => {}
+                        }
                     }
+                } else {
+                    was_down = false;
                 }
+            } else {
+                was_down = false;
             }
             if last_tick.elapsed() >= tick_rate {
                 self.tick();
