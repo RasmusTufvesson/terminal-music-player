@@ -19,5 +19,5 @@ fn main() {
     let songs = sound::get_song_selection(&config.dir);
     let player = sound::Player::new(sink, songs);
     let mut app = app::App::new(player);
-    app.run(Duration::from_millis(50));
+    app.run(Duration::from_millis(25));
 }
