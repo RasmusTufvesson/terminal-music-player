@@ -43,7 +43,7 @@ impl App {
     fn mainloop (&mut self, tick_rate: Duration, terminal: &mut Terminal<CrosstermBackend<Stdout>>) -> io::Result<()> {
         let mut last_tick = Instant::now();
         let mut should_quit = false;
-        let mut was_down = false;
+        let mut last_down = Instant::now();
         loop {
             terminal.draw(|f: &mut tui::Frame<CrosstermBackend<Stdout>>| self.draw(f))?;
 
@@ -52,8 +52,8 @@ impl App {
                 .unwrap_or_else(|| Duration::from_secs(0));
             if crossterm::event::poll(timeout)? {
                 if let Event::Key(key) = event::read()? {
-                    if !was_down {
-                        was_down = true;
+                    if last_down.elapsed() >= Duration::from_millis(250) {
+                        last_down = Instant::now();
                         match key.code {
                             KeyCode::Char(c) => {
                                 match c {
@@ -71,11 +71,7 @@ impl App {
                             _ => {}
                         }
                     }
-                } else {
-                    was_down = false;
                 }
-            } else {
-                was_down = false;
             }
             if last_tick.elapsed() >= tick_rate {
                 self.tick();
@@ -137,7 +133,7 @@ impl App {
     }
 
     fn draw_volume_indicator(&self, frame: &mut tui::Frame<CrosstermBackend<Stdout>>, area: Rect) {
-        let binding: [(&str, u64); 2] = [("", (self.player.volume*100.0) as u64), ("", 120)];
+        let binding = [("", (self.player.volume*100.0) as u64)];
         let barchart = BarChart::default()
             .block(Block::default().title("Vol").borders(Borders::ALL))
             .data(&binding)
@@ -148,7 +144,8 @@ impl App {
                 Style::default()
                     .bg(Color::Green)
                     .add_modifier(Modifier::BOLD),
-            );
+            )
+            .max(120);
         frame.render_widget(barchart, area);
     }
 }
