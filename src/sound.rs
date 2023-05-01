@@ -112,14 +112,14 @@ impl Player {
         }
     }
 
-    pub fn volume_up(&mut self) {
-        let new_vol = (self.volume + 0.1).min(1.2);
+    pub fn volume_up(&mut self, half_change: bool) {
+        let new_vol = (self.volume + match half_change { false => { 0.1 }, true => { 0.05 } }).min(1.2);
         self.volume = new_vol;
         self.sink.set_volume(new_vol as f32);
     }
 
-    pub fn volume_down(&mut self) {
-        let new_vol = (self.volume - 0.1).max(0.0);
+    pub fn volume_down(&mut self, half_change: bool) {
+        let new_vol = (self.volume - match half_change { false => { 0.1 }, true => { 0.05 } }).max(0.0);
         self.volume = new_vol;
         self.sink.set_volume(new_vol as f32);
     }

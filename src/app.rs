@@ -2,7 +2,7 @@ use std::{io::{self, Stdout}, time::{Duration, Instant}};
 use tui::{backend::CrosstermBackend, Terminal, layout::{Layout, Constraint, Rect}, widgets::{Borders, Block, Gauge, ListItem, List, ListState, BarChart}, style::{Style, Color, Modifier}, text::{Spans, Span}};
 use crate::sound::{Player};
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -60,14 +60,14 @@ impl App {
                                     ' ' => { self.player.pause(); }
                                     'q' => { should_quit = true; }
                                     'd' => { self.player.skip_song(); }
-                                    'w' => { self.player.volume_up(); }
-                                    's' => { self.player.volume_down(); }
+                                    'w' => { self.player.volume_up(key.modifiers == KeyModifiers::SHIFT); }
+                                    's' => { self.player.volume_down(key.modifiers == KeyModifiers::SHIFT); }
                                     _ => {}
                                 }
                             },
                             KeyCode::Right => { self.player.skip_song(); }
-                            KeyCode::Up => { self.player.volume_up(); }
-                            KeyCode::Down => { self.player.volume_down(); }
+                            KeyCode::Up => { self.player.volume_up(key.modifiers == KeyModifiers::SHIFT); }
+                            KeyCode::Down => { self.player.volume_down(key.modifiers == KeyModifiers::SHIFT); }
                             _ => {}
                         }
                     }
